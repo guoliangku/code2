@@ -1,8 +1,17 @@
 package com.example.entity;
 
-import com.example.base.BaseEntity;
 
-public class UserEntity extends BaseEntity {
+
+public class UserEntity {
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     private String name;
 
