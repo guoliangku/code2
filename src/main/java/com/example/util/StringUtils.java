@@ -13,4 +13,17 @@ public class StringUtils {
         String str = uuid.toString();
         return str;
     }
+
+    /**
+     * 判断字符是否空
+     * @param str
+     * @return
+     */
+    public static boolean isEmpty(String str){
+        if(str==null || "".equals(str)){
+            return true;
+        }else {
+            return false;
+        }
+    }
 }

@@ -6,12 +6,13 @@ import com.example.util.RedisUtils;
 import com.example.util.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.awt.*;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -25,7 +26,7 @@ public class UserController {
     @Autowired
     private RedisUtils redisUtils;
 
-    private static final String rfg ="redis_config_oppp2222ppsss";
+    private static final String rfg ="redis_config";
 
     @RequestMapping("/save")
     public void save(){
@@ -53,6 +54,52 @@ public class UserController {
             userService.save(userEntity);
         }
 
+    }
+
+    /**'
+     * 列表查询
+     * @return
+     */
+    @RequestMapping(value = "/findMap",method = RequestMethod.GET)
+    public Map<String,Object> findMap(){
+        Map<String,Object> map = new HashMap<>();
+        boolean hasKey = redisUtils.exists(rfg);
+        if(hasKey){
+            log.info("缓存信息存在");
+            Object object = redisUtils.get(rfg);
+            UserEntity userEntity = (UserEntity) object;
+            map.put("map",userEntity);
+        }else{
+            log.info("缓存信息不存在");
+            List<UserEntity> list = userService.findByUser();
+            map.put("map",list);
+        }
+        return map;
+    }
+
+    /**
+     * 根据id删除用户信息
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/delete/{id}")
+    public Map<String,Object> delete(@PathVariable(value = "id") String id){
+        Map<String,Object> map = new HashMap<>();
+        int it =0;
+        if(StringUtils.isEmpty(id)==false){
+            //不为空，先清除redis缓存中的数据
+       //     redisUtils.remove(id);
+            it = userService.delete(id);
+        }
+        //删除失败
+        if(it==-1){
+            map.put("error","删除失败");
+        }else if(it==0){
+            map.put("success","删除成功");
+        }else{
+            map.put("error","服务异常");
+        }
+        return map;
     }
 
 
