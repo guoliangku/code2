@@ -1,8 +1,9 @@
 package com.example.entity;
 
 
+import java.io.Serializable;
 
-public class UserEntity {
+public class UserEntity implements Serializable{
     private String id;
 
     public String getId() {
