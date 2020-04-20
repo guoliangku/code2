@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 @RestController
@@ -26,16 +27,16 @@ public class UserController {
     @Autowired
     private RedisUtils redisUtils;
 
-    private static final String rfg ="redis_config";
+    private static final String rfg ="redis_config_lk";
 
     @RequestMapping("/save")
     public void save(){
         UserEntity userEntity = new UserEntity();
-        userEntity.setId(StringUtils.getUUID());
-        userEntity.setName("张三9932222");
+        userEntity.setId("2615f3ff-245a-433a-a021-22bd91db9a06");
+        userEntity.setName("王五444");
 
-        boolean flag = redisUtils.set(rfg,userEntity);
-
+        //boolean flag = redisUtils.set(rfg,userEntity);
+        redisUtils.add(rfg,userEntity);
         /**
          * 判断缓存中是否存在
          */
@@ -44,15 +45,14 @@ public class UserController {
             /**
              * 从缓存中读取数据
              */
-            Object object = redisUtils.get(rfg);
+            Set<Object> set =  redisUtils.setMembers(rfg);
             //转换
-            UserEntity userEntitys = (UserEntity) object;
-            log.info("从缓存中读取数据为："+userEntitys.getName()+"和"+userEntitys.getId());
+            log.info("从缓存中读取数据为："+set+"和"+set);
         }
-        if(flag){
+        /*if(flag){
             log.info("添加缓存成功");
             userService.save(userEntity);
-        }
+        }*/
 
     }
 
@@ -66,9 +66,8 @@ public class UserController {
         boolean hasKey = redisUtils.exists(rfg);
         if(hasKey){
             log.info("缓存信息存在");
-            Object object = redisUtils.get(rfg);
-            UserEntity userEntity = (UserEntity) object;
-            map.put("map",userEntity);
+            Set<Object> setMembers = redisUtils.setMembers(rfg);
+            map.put("map",setMembers);
         }else{
             log.info("缓存信息不存在");
             List<UserEntity> list = userService.findByUser();
@@ -86,6 +85,7 @@ public class UserController {
     public Map<String,Object> delete(@PathVariable(value = "id") String id){
         Map<String,Object> map = new HashMap<>();
         int it =0;
+        redisUtils.remove(rfg);
         if(StringUtils.isEmpty(id)==false){
             //不为空，先清除redis缓存中的数据
        //     redisUtils.remove(id);
