@@ -7,10 +7,11 @@
 <!-- #{???} 取Blog对象的bean属性名-->
 <insert id="save">
     INSERT INTO user(
-    id,name
+    id,name,city,birthday,password,phone
     )VALUES (
     #{id},
-    #{name}
+    #{name},
+    #{city},#{birthday},#{password},#{phone}
     )
 </insert>
 </mapper>

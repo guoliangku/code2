@@ -3,8 +3,10 @@ package com.example.service;
 import com.example.entity.UserEntity;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService {
 
@@ -26,7 +28,6 @@ public interface UserService {
      * @param id
      * @return
      */
-    @Delete("delete from user where id =#{id}")
     int delete(@Param("id") String id);
 
     /**
@@ -34,7 +35,13 @@ public interface UserService {
      * @param userEntity
      * @return
      */
-    @Delete("update user set name=#{name} where id =#{id}")
     int update(UserEntity userEntity);
+
+    /**
+     * 通过用户名称查询
+     * @param name
+     * @return
+     */
+    List<UserEntity> findMapUser(@Param("name") String name);
 
 }

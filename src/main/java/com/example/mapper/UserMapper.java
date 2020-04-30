@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface UserMapper {
@@ -22,7 +23,7 @@ public interface UserMapper {
      * 获取所有用户列表信息
      * @return
      */
-    @Select("SELECT * FROM user")
+    @Select("SELECT * FROM user ")
     List<UserEntity> findByUser();
 
     /**
@@ -40,4 +41,12 @@ public interface UserMapper {
      */
     @Delete("update user set name=#{name} where id =#{id}")
     boolean update(UserEntity userEntity);
+
+    /**
+     * 通过用户名称查询
+     * @param name
+     * @return
+     */
+    @Select("SELECT * FROM user where name=#{name}")
+    List<UserEntity> findMapUser(@Param("name")String name);
 }

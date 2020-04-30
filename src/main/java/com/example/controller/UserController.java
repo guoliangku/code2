@@ -1,24 +1,25 @@
 package com.example.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.example.base.BaseController;
 import com.example.entity.UserEntity;
 import com.example.service.UserService;
 import com.example.util.RedisUtils;
 import com.example.util.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
 
 
 @RestController
 @RequestMapping("/web")
-public class UserController {
+public class UserController extends BaseController {
 
     private static Logger log = Logger.getLogger(UserController.class);
 
@@ -27,80 +28,117 @@ public class UserController {
     @Autowired
     private RedisUtils redisUtils;
 
-    private static final String rfg ="redis_config_lk";
+    private static final String rfg ="redis_users3333";
 
     @RequestMapping("/save")
-    public void save(){
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId("2615f3ff-245a-433a-a021-22bd91db9a06");
-        userEntity.setName("王五444");
+    public String save(UserEntity userEntity){
+        userEntity.setId(StringUtils.getUUID());
 
-        //boolean flag = redisUtils.set(rfg,userEntity);
-        redisUtils.add(rfg,userEntity);
-        /**
-         * 判断缓存中是否存在
-         */
-        boolean hasKey = redisUtils.exists(rfg);
-        if(hasKey){
-            /**
-             * 从缓存中读取数据
-             */
-            Set<Object> set =  redisUtils.setMembers(rfg);
-            //转换
-            log.info("从缓存中读取数据为："+set+"和"+set);
-        }
-        /*if(flag){
-            log.info("添加缓存成功");
+        JSONObject obj = new JSONObject();
+        try {
             userService.save(userEntity);
-        }*/
+            obj.put("code",0);
+        }catch (Exception e){
+            obj.put("code",1);
+        }
+        return obj.toJSONString();
 
     }
 
-    /**'
-     * 列表查询
-     * @return
+
+    /**\
+     * 列表加载数据
+     * @param request
+     * @param
      */
-    @RequestMapping(value = "/findMap",method = RequestMethod.GET)
-    public Map<String,Object> findMap(){
+    @RequestMapping(value = "/loadData")
+    public void loadData(HttpServletRequest request, HttpServletResponse response){
+        List<UserEntity> list = userService.findByUser();
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("application/json;charset=utf-8");
         Map<String,Object> map = new HashMap<>();
         boolean hasKey = redisUtils.exists(rfg);
         if(hasKey){
-            log.info("缓存信息存在");
-            Set<Object> setMembers = redisUtils.setMembers(rfg);
-            map.put("map",setMembers);
-        }else{
-            log.info("缓存信息不存在");
-            List<UserEntity> list = userService.findByUser();
-            map.put("map",list);
+            Set<Object> set =  redisUtils.setMembers(rfg);
+            //迭代
+            map.put("map",set);
+
+            log.info("从缓存中读取数据为："+map+"和"+map);
+            rendData(response,0,1,set);
+            }
+
+
+        if(!list.isEmpty()){
+            try {
+                rendData(response,0,1,list);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
         }
-        return map;
+
     }
 
     /**
-     * 根据id删除用户信息
+     * 删除数据
      * @param id
-     * @return
+     * @param response
      */
-    @RequestMapping(value = "/delete/{id}")
-    public Map<String,Object> delete(@PathVariable(value = "id") String id){
-        Map<String,Object> map = new HashMap<>();
-        int it =0;
-        redisUtils.remove(rfg);
-        if(StringUtils.isEmpty(id)==false){
-            //不为空，先清除redis缓存中的数据
-       //     redisUtils.remove(id);
-            it = userService.delete(id);
+    @RequestMapping(value = "/delete")
+    public String delete(String id,HttpServletResponse response){
+
+        JSONObject obj = new  JSONObject();
+        obj.put("msg","删除成功");
+        try {
+            userService.delete(id);
+            obj.put("code",0);
+        }catch (Exception  e){
+            e.printStackTrace();
         }
-        //删除失败
-        if(it==-1){
-            map.put("error","删除失败");
-        }else if(it==0){
-            map.put("success","删除成功");
-        }else{
-            map.put("error","服务异常");
-        }
-        return map;
+
+        return obj.toJSONString();
+
     }
 
 
+
+
+    /**
+     * 登录
+     * @param name
+     * @param password
+     * @return
+     */
+    @RequestMapping(value = "/login")
+    public String login(String name, String password, ModelMap model){
+
+      /*  //1.获取Subject
+        Subject subject = SecurityUtils.getSubject();
+
+        //2.封装数据信息
+        UsernamePasswordToken token = new UsernamePasswordToken(name,password);
+
+        //执行登录方法
+        try {
+            subject.login(token);
+        }catch (UnknownAccountException e){
+            //用户名信息错误
+            model.addAttribute("msg","用户名信息错误");
+            return "/login";
+        }catch (IncorrectCredentialsException e){
+            //密码信息错误
+            model.addAttribute("msg","密码信息错误");
+            return "/login";
+        }*/
+        JSONObject obj = new JSONObject();
+
+        List<UserEntity> list = userService.findMapUser(name);
+        if(!list.isEmpty()){
+            obj.put("code",0);
+        }else{
+            obj.put("code",1);
+        }
+
+        return obj.toJSONString();
+    }
 }

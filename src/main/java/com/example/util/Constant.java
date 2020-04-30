@@ -11,10 +11,18 @@ public class Constant {
     /**
      * 成功标识
      */
-    private static final int success=0;
+    private  final int success=0;
 
     /**
      * 失败标识
      */
-    private static final int error=-1;
+    private  final int error=-1;
+
+    public  int getSuccess() {
+        return success;
+    }
+
+    public  int getError() {
+        return error;
+    }
 }

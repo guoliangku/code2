@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -48,5 +49,11 @@ public class UserServiceImpl implements UserService {
         }else{
             return -1;
         }
+    }
+
+    @Override
+    public List<UserEntity> findMapUser(String name) {
+
+        return  userMapper.findMapUser(name);
     }
 }
